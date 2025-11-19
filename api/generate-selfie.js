@@ -1,61 +1,43 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import express from "express";
+import fetch from "node-fetch";
+import cors from "cors";
+import dotenv from "dotenv";
 
-export default async function handler(req, res) {
+dotenv.config();
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+
+app.post("/api/generate-selfie", async (req, res) => {
   try {
-    if (req.method !== "POST") {
-      return res.status(405).json({ error: "Only POST method is allowed" });
-    }
-
-    const { prompt, imageBase64 } = req.body;
+    const { prompt, image } = req.body;
 
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({
-        error:
-          "Gemini API key missing. Set GEMINI_API_KEY in your Vercel Project Settings.",
+        error: "GEMINI_API_KEY bulunamadı. Render Environment Variables bölümüne ekleyin."
       });
     }
 
-    if (!prompt || !imageBase64) {
-      return res
-        .status(400)
-        .json({ error: "prompt and imageBase64 are required." });
-    }
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" +
+        process.env.GEMINI_API_KEY,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }]
+        })
+      }
+    );
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    const result = await model.generateContent({
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                data: imageBase64,
-                mimeType: "image/jpeg",
-              },
-            },
-          ],
-        },
-      ],
-    });
-
-    const response = await result.response;
-    const outputImage = response.candidates?.[0]?.content?.parts?.[0]?.inlineData;
-
-    if (!outputImage) {
-      return res.status(500).json({
-        error: "Gemini did not return an image.",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      imageBase64: outputImage.data, // FRONTEND bunu alıp gösteriyor
-    });
-  } catch (err) {
-    console.error("Backend error:", err);
-    res.status(500).json({ error: err.message });
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error("SELFIE API ERROR:", error);
+    res.status(500).json({ error: error.message });
   }
-}
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Backend çalışıyor:", PORT));
