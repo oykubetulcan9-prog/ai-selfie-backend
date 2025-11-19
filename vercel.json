@@ -1,11 +1,8 @@
 {
-  "buildCommand": "npm install",
-  "outputDirectory": "public",
+  "version": 2,
   "functions": {
     "api/generate-selfie.js": {
-      "runtime": "nodejs22.x",
-      "memory": 1024,
-      "maxDuration": 30
+      "runtime": "nodejs22.x"
     }
   }
 }
