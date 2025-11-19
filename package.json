@@ -1,0 +1,7 @@
+{
+    "name": "ai-selfie-backend",
+    "version": "1.0.0",
+    "main": "api/generate-selfie.js",
+    "license": "MIT"
+  }
+  
