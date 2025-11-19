@@ -1,8 +1,14 @@
 {
   "version": 2,
   "functions": {
-    "api/*.js": {
-      "runtime": "nodejs18.x"
+    "api/generate-selfie.js": {
+      "runtime": "nodejs22.x"
     }
-  }
+  },
+  "routes": [
+    {
+      "src": "/api/generate-selfie",
+      "dest": "/api/generate-selfie.js"
+    }
+  ]
 }
